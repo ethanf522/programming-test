@@ -14,6 +14,8 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 public class Robot extends IterativeRobot {
 	final String defaultAuto = "Default";
 	final String customAuto = "My Auto";
+	public Shooter shooter;
+	public Drive robotDrive;
 	String autoSelected;
 	SendableChooser<String> chooser = new SendableChooser<>();
 
@@ -26,6 +28,7 @@ public class Robot extends IterativeRobot {
 		chooser.addDefault("Default Auto", defaultAuto);
 		chooser.addObject("My Auto", customAuto);
 		SmartDashboard.putData("Auto choices", chooser);
+		shooter = new Shooter(IO.shooter, IO.conveyor, IO.agitator, IO.vibrator, IO.snorfler);
 	}
 
 	/**
@@ -42,8 +45,7 @@ public class Robot extends IterativeRobot {
 	@Override
 	public void autonomousInit() {
 		autoSelected = chooser.getSelected();
-		// autoSelected = SmartDashboard.getString("Auto Selector",
-		// defaultAuto);
+		robotDrive.driveInit();
 		System.out.println("Auto selected: " + autoSelected);
 	}
 
@@ -52,6 +54,7 @@ public class Robot extends IterativeRobot {
 	 */
 	@Override
 	public void autonomousPeriodic() {
+		robotDrive.autoUpdate();
 		switch (autoSelected) {
 		case customAuto:
 			// Put custom auto code here
@@ -66,8 +69,17 @@ public class Robot extends IterativeRobot {
 	/**
 	 * This function is called periodically during operator control
 	 */
+	
+	@Override
+	public void teleopInit() {
+		shooter.shooterInit();
+		robotDrive.driveInit();
+	}
+	
 	@Override
 	public void teleopPeriodic() {
+		shooter.update();
+		robotDrive.teleopUpdate();
 	}
 
 	/**
